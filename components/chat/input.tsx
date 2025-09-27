@@ -109,7 +109,7 @@ export const ChatInput = ({
         </Button>
       )}
 
-      <div className="w-full flex flex-col gap-1 bg-[#F4F4F4] p-2.5 pl-4 rounded-md border border-b-0 rounded-b-none shadow-md">
+      <div className="w-full flex flex-col gap-1 bg-[#F4F4F4] p-2.5 pl-4 rounded-2xl border border-b-0 rounded-b-none shadow-md">
         {/* Attachment preview */}
         {attachments && (
           <div className="flex items-center gap-2 mb-2">
@@ -123,13 +123,13 @@ export const ChatInput = ({
           </div>
         )}
 
-        <div className="flex gap-2 items-start">
+    <div className="flex gap-2 items-start">
           {/* Main input textarea */}
           <Textarea
             ref={inputRef}
             tabIndex={0}
             onKeyDown={onKeyDown}
-            placeholder="Send a message."
+            placeholder="Message Duet."
             className="min-h-15 max-h-96 overflow-auto w-full bg-transparent border-none resize-none focus-within:outline-none"
             autoFocus
             spellCheck={false}
@@ -155,7 +155,7 @@ export const ChatInput = ({
           <Button
             variant="outline"
             size="icon"
-            className="w-8 h-8 bg-transparent"
+            className="w-10 h-8 bg-transparent rounded-2xl"
             onClick={handleFileUpload}
           >
             <PaperclipIcon className="w-4 h-4" />
@@ -169,7 +169,7 @@ export const ChatInput = ({
                   onClick={() => (recording ? onStopRecord() : onStartRecord())}
                   size="icon"
                   variant="outline"
-                  className="w-8 h-8 bg-transparent disabled:pointer-events-auto"
+                  className="w-10 h-8 bg-transparent disabled:pointer-events-auto rounded-2xl"
                 >
                   {recording ? (
                     <PauseIcon className="w-4 h-4" />
@@ -192,7 +192,7 @@ export const ChatInput = ({
           <Button
             onClick={isLoading ? stopGenerating : onSubmit}
             size="icon"
-            className="w-8 h-8"
+            className="w-10 h-8 rounded-2xl"
           >
             {isLoading ? (
               <CircleStopIcon className="w-4 h-4" />
@@ -208,10 +208,11 @@ export const ChatInput = ({
             <SelectValue placeholder="Select Model" />
           </SelectTrigger>
           <SelectContent className="w-fit">
-            <SelectItem value={Models.claude}>Claude Sonnet</SelectItem>
-            <SelectItem value={Models.gpt4o}>GPT 4-o</SelectItem>
-            <SelectItem value={Models.gpt4turbo}>GPT-4 Turbo</SelectItem>
-            <SelectItem value={Models.gpt35turbo}>GPT-3.5 Turbo</SelectItem>
+          <SelectItem value={Models.gpt4o}>Duet</SelectItem>
+          <SelectItem value={Models.gpt4oMini}>GPT-4o Mini</SelectItem>
+          <SelectItem value={Models.gpt4turbo}>GPT-4 Turbo</SelectItem>
+          <SelectItem value={Models.gpt35turbo}>GPT-3.5 Turbo</SelectItem>
+
           </SelectContent>
         </Select>
       </div>

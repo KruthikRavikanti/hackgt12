@@ -1,7 +1,7 @@
 "use client";
 
-import { ArtifactPanel } from "@/components/artifact";
-import { ChatInput, Props as ChatInputProps } from "@/components/chat/input";
+import ArtifactPanel from "@/components/artifact";
+import { ChatInput } from "@/components/chat/input";
 import { ChatMessageList } from "@/components/chat/message-list";
 import { Message, useChat } from "ai/react";
 import { getSettings } from "@/lib/userSettings";
@@ -18,6 +18,8 @@ import { Props as ReactArtifactProps } from "@/components/artifact/react";
 import { useEffect, useState } from "react";
 import { useScrollAnchor } from "@/lib/hooks/use-scroll-anchor";
 import { useFakeWhisper } from "@/lib/hooks/use-fake-whisper";
+import { Props as ChatInputProps } from "@/components/chat/input";
+
 
 type Props = {
   id: string | null;
@@ -45,7 +47,7 @@ export const ChatPanel = ({ id }: Props) => {
       setFetchingMessages(true);
       const messages = await getChatMessages(supabase, chatId);
       setInitialMessages(
-        messages.map((message) => ({
+        messages.map((message: { id: number; role: string; text: string; attachments: unknown }) => ({
           id: String(message.id),
           role: message.role as Message["role"],
           content: message.text,
@@ -94,10 +96,6 @@ export const ChatPanel = ({ id }: Props) => {
     isLoading: generatingResponse,
   } = useChat({
     initialMessages,
-    body: {
-      apiKey: settings.claudeApiKey,
-      model: settings.model,
-    },
     onFinish: async (message) => {
       if (chatId) {
         await addMessage(supabase, chatId, message);
@@ -158,13 +156,13 @@ export const ChatPanel = ({ id }: Props) => {
 
   // Handle attachment management
   const handleAddAttachment: ChatInputProps["onAddAttachment"] = (
-    newAttachments
+    newAttachments: Attachment[]
   ) => {
     setAttachments((prev) => [...prev, ...newAttachments]);
   };
-
+  
   const handleRemoveAttachment: ChatInputProps["onRemoveAttachment"] = (
-    attachment
+    attachment: Attachment
   ) => {
     setAttachments((prev) =>
       prev.filter((item) => item.url !== attachment.url)
@@ -178,10 +176,6 @@ export const ChatPanel = ({ id }: Props) => {
 
     const settings = getSettings();
 
-    if (settings.model === Models.claude && !settings.claudeApiKey) {
-      toast.error("Please enter your Claude API Key");
-      return;
-    }
 
     if (settings.model.startsWith("gpt") && !settings.openaiApiKey) {
       toast.error("Please enter your OpenAI API Key");
@@ -195,11 +189,19 @@ export const ChatPanel = ({ id }: Props) => {
       ...selectedArtifacts.map((url) => ({ url })),
     ];
 
-    append({
-      role: "user",
-      content: query,
-      experimental_attachments: messageAttachments,
-    });
+    append(
+      {
+        role: "user",
+        content: query,
+        experimental_attachments: messageAttachments,
+      },
+      {
+        body: {
+          model: settings.model,
+          apiKey: settings.openaiApiKey,
+        },
+      }
+    );
 
     setInput("");
     stopRecording();
@@ -218,11 +220,9 @@ export const ChatPanel = ({ id }: Props) => {
   };
 
   return (
-    <>
-      <div
-        className="relative flex w-full flex-1 overflow-x-hidden overflow-y-scroll pt-6"
-        ref={scrollRef}
-      >
+    <div className={`relative flex w-full h-full ${currentArtifact ? 'flex-row' : 'flex-col'} overflow-hidden pt-6`}>
+      {/* Chat and Input on the left */}
+      <div className={`flex flex-col h-full ${currentArtifact ? 'w-1/2' : 'w-full'} overflow-y-scroll`} ref={scrollRef}>
         <div className="relative mx-auto flex h-full w-full min-w-[400px] max-w-3xl flex-1 flex-col md:px-2">
           {fetchingMessages && <Loader2Icon className="animate-spin mx-auto" />}
 
@@ -250,21 +250,24 @@ export const ChatPanel = ({ id }: Props) => {
         </div>
       </div>
 
+      {/* Artifact Panel on the right */}
       {currentArtifact && (
-        <div className="w-full max-w-xl h-full max-h-full pt-6 pb-4">
-          <ArtifactPanel
-            title={currentArtifact.title}
-            id={currentArtifact.id}
-            type={currentArtifact.type}
-            generating={currentArtifact.generating}
-            content={currentArtifact.content}
-            language={currentArtifact.language}
-            onClose={() => setCurrentArtifact(null)}
-            recording={recording}
-            onCapture={handleCapture}
-          />
+        <div className="flex h-full w-1/2 overflow-y-auto">
+          <div className="w-full h-full max-h-full pt-6 pb-4">
+            <ArtifactPanel
+              title={currentArtifact.title}
+              id={currentArtifact.id}
+              type={currentArtifact.type}
+              generating={currentArtifact.generating}
+              content={currentArtifact.content}
+              language={currentArtifact.language}
+              onClose={() => setCurrentArtifact(null)}
+              recording={recording}
+              onCapture={handleCapture}
+            />
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 };

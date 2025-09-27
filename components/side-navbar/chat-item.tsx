@@ -10,9 +10,9 @@ export const ChatItem = ({ id, title, selected }: ChatItemProps) => {
   return (
     <Link href={`/chat/${id}`}>
       <div
-        className={`group cursor-pointer flex items-center gap-2 justify-between px-2 py-1 rounded-md w-full ${
-          selected ? "bg-slate-200" : "bg-transparent"
-        } hover:bg-slate-200`}
+        className={` text-white group cursor-pointer flex items-center gap-2 justify-between px-2 py-1 rounded-md w-full ${
+          selected ? "bg-[#5a6d81] text-white" : "bg-transparent" 
+        } hover:bg-[#4e5456]`}  //Changed chat history colors
       >
         <span className="flex-1 truncate text-sm">{title}</span>
 

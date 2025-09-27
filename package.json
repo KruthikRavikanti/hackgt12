@@ -9,8 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^0.0.30",
-    "@ai-sdk/openai": "^0.0.36",
+    "@ai-sdk/openai": "^0.0.38",
     "@chengsokdara/use-whisper": "^0.2.0",
     "@ffmpeg/core": "^0.11.0",
     "@hookform/resolvers": "^3.9.0",
@@ -20,16 +19,19 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@slnsw/react-sheet-music": "^0.0.6",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.44.3",
     "@tanstack/react-query": "^5.51.1",
-    "ai": "^3.2.29",
+    "abcjs": "^6.4.4",
+    "ai": "^3.2.34",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.407.0",
-    "next": "14.2.5",
+    "next": "^14.2.17",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.52.1",
@@ -38,6 +40,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "react-textarea-autosize": "^8.5.3",
     "remark-gfm": "^4.0.0",
+    "supabase": "^1.215.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
@@ -50,8 +53,12 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
+    "midi.js": "git+https://github.com/mudcube/MIDI.js.git",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  }, "overrides": {
+  "midi.js": "git+https://github.com/mudcube/MIDI.js.git",
+  "midi": "git+https://github.com/mudcube/MIDI.js.git"
   }
 }

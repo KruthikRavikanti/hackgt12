@@ -52,9 +52,9 @@ export const UserSettings = ({ showLabel = false }: Props) => {
   return (
     <Dialog>
       <DialogTrigger className="w-full flex items-center justify-start gap-4 px-1">
-        <SettingsIcon className="w-6 h-6" />
+        <SettingsIcon className="w-6 h-6 text-[#f8f6f3]" />
 
-        {showLabel && <span className="font-medium text-sm">Settings</span>}
+        {showLabel && <span className="font-medium text-sm text-[#f8f6f3]">Settings</span>}
       </DialogTrigger>
 
       <DialogContent>
@@ -64,19 +64,6 @@ export const UserSettings = ({ showLabel = false }: Props) => {
               <DialogTitle>Settings</DialogTitle>
             </DialogHeader>
 
-            <FormField
-              control={form.control}
-              name="claudeApiKey"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Claude API Key</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="password" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}

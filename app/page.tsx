@@ -1,25 +1,49 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { GithubIcon, RocketIcon } from "lucide-react";
+import { GithubIcon, RocketIcon, MenuIcon } from "lucide-react";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function LandingPage() {
+export const dynamic = 'force-dynamic';
+
+
+export default async function LandingPage() {
+  const supabase = createServerComponentClient({ cookies });
+
+  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/new");
+  }
+  
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">
-            Open Artifacts
-          </h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Open Artifacts</h1>
 
-          <nav className="flex flex-row items-center gap-4">
-            <Link href="/signin">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Sign Up</Button>
-            </Link>
-          </nav>
+            <label htmlFor="menu-toggle" className="sm:hidden cursor-pointer">
+              <MenuIcon className="h-6 w-6" />
+            </label>
+
+            <input type="checkbox" id="menu-toggle" className="hidden" />
+
+            <nav className="hidden sm:flex flex-col sm:flex-row items-center gap-4 absolute sm:static left-0 right-0 top-full bg-white sm:bg-transparent shadow-md sm:shadow-none pb-4 sm:pb-0">
+              <Link href="/signin">
+                <Button variant="ghost">Sign In</Button>
+              </Link>
+              <Link href="/signup">
+                <Button>Sign Up</Button>
+              </Link>
+            </nav>
+          </div>
         </div>
       </header>
 
@@ -34,48 +58,30 @@ export default function LandingPage() {
               Generate Artifacts with your own API keys.
             </p>
 
-            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-              <div className="rounded-md shadow">
-                <Link href="/new">
-                  <Button size="lg" className="w-full">
-                    <RocketIcon className="mr-2 h-4 w-4" />
-                    Get Started for FREE
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-                <a
-                  href="https://github.com/13point5/open-artifacts"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="lg" className="w-full">
-                    <GithubIcon className="mr-2 h-4 w-4" />
-                    View on GitHub
-                  </Button>
-                </a>
-              </div>
-            </div>
+            <CTABar />
 
             <div className="mt-12 flex flex-col items-center gap-4">
               <h3 className="text-md font-medium text-gray-500 text-center">
                 Supported LLM Providers
               </h3>
               <div className="flex flex-row items-center gap-8">
-                <Image
-                  src="/anthropic.svg"
-                  alt="Anthropic"
-                  width={143}
-                  height={16}
-                />
+                <Link href="https://www.anthropic.com/" target="_blank">
+                  <Image
+                    src="/anthropic.svg"
+                    alt="Anthropic"
+                    width={143}
+                    height={16}
+                  />
+                </Link>
 
-                <Image
-                  src="/openai.svg"
-                  alt="OpenAI"
-                  width={118 * 0.75}
-                  height={32 * 0.75}
-                />
+                <Link href="https://openai.com/" target="_blank">
+                  <Image
+                    src="/openai.svg"
+                    alt="OpenAI"
+                    width={118 * 0.75}
+                    height={32 * 0.75}
+                  />
+                </Link>
               </div>
             </div>
           </div>
@@ -98,7 +104,8 @@ export default function LandingPage() {
               your artifacts and say or type your changes, creating a more
               natural and context-aware iteration process.
             </p>
-            <div className="relative">
+
+            <div className="mb-8">
               <Image
                 src="/crop-and-talk.png"
                 alt="Crop and Talk Feature"
@@ -108,31 +115,12 @@ export default function LandingPage() {
               />
             </div>
 
-            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-10">
-              <div className="rounded-md shadow">
-                <Link href="/new">
-                  <Button size="lg" className="w-full">
-                    Get Started
-                  </Button>
-                </Link>
-              </div>
-              <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-                <a
-                  href="https://github.com/13point5/open-artifacts"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="lg" className="w-full">
-                    View on GitHub
-                  </Button>
-                </a>
-              </div>
-            </div>
+            <CTABar />
           </div>
         </div>
       </main>
 
-      <footer className="bg-gray-50">
+      <footer className="">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-base text-gray-400">
             &copy; 2024 Open Artifacts. All rights reserved.
@@ -163,3 +151,38 @@ export default function LandingPage() {
     </div>
   );
 }
+
+const CTABar = () => (
+  <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+    <div className="rounded-md shadow">
+      <Link href="/new">
+        <Button
+          size="lg"
+          className="w-full bg-gradient-to-b from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600"
+        >
+          <RocketIcon className="mr-2 h-4 w-4" />
+          Get Started for FREE
+        </Button>
+      </Link>
+    </div>
+
+    <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+      <a
+        href="https://github.com/13point5/open-artifacts"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Button variant="outline" size="lg" className="w-full">
+          <Image
+            src="/github.svg"
+            alt="GitHub"
+            width={20}
+            height={20}
+            className="mr-2"
+          />
+          View on GitHub
+        </Button>
+      </a>
+    </div>
+  </div>
+);

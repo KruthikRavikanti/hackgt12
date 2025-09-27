@@ -4,7 +4,6 @@ import { z } from "zod";
 export const settingsLocalStorageKey = "openArtifacts:settings";
 
 export const settingsSchema = z.object({
-  claudeApiKey: z.string(),
   openaiApiKey: z.string(),
   model: z.nativeEnum(Models),
 });
@@ -12,12 +11,16 @@ export const settingsSchema = z.object({
 export type SettingsSchema = z.infer<typeof settingsSchema>;
 
 const defaultSettings: SettingsSchema = {
-  claudeApiKey: "",
   openaiApiKey: "",
-  model: Models.claude,
+  model: Models.gpt4o,
 };
 
 export const getSettings = (): SettingsSchema => {
+  if (typeof window === "undefined") {
+    // Server-side: return default settings
+    return defaultSettings;
+  }
+
   const storedSettings = window.localStorage.getItem(settingsLocalStorageKey);
 
   if (!storedSettings) {
@@ -39,9 +42,9 @@ export const getSettings = (): SettingsSchema => {
       !Object.values(Models).includes(mergedSettings.model)
     ) {
       console.warn(
-        `Invalid model value: ${mergedSettings.model}. Resetting to null.`
+        `Invalid model value: ${mergedSettings.model}. Resetting to default.`
       );
-      mergedSettings.model = Models.claude;
+      mergedSettings.model = Models.gpt4o;
     }
 
     // Validate and parse the merged settings

@@ -28,6 +28,9 @@ import toast from "react-hot-toast";
 import { Loader2Icon } from "lucide-react";
 import { SocialFooter } from "@/components/social-footer";
 import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
+import { OAuthProviderButton } from "@/components/oauth-provider-button";
+import { OAuthProviders } from "@/app/types";
 
 enum FormStatus {
   Idle,
@@ -85,19 +88,64 @@ const SignUpForm = () => {
     setFormStatus(FormStatus.Success);
   };
 
+  const handleOAuthSignIn = async (provider: OAuthProviders) => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
+    });
+
+    if (error) {
+      console.error(error);
+      toast.error("Could not Sign In", {
+        position: "top-right",
+      });
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    handleOAuthSignIn(OAuthProviders.google);
+  };
+
+  const handleGitHubSignIn = () => {
+    handleOAuthSignIn(OAuthProviders.github);
+  };
+
   return (
     <main className="flex flex-col gap-6 items-center w-full h-screen pt-8 px-4">
       <Link href="/">
         <h1 className="text-4xl font-bold">Open Artifacts</h1>
       </Link>
+
       <Card className="max-w-sm w-full">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Create an account</CardTitle>
         </CardHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-            <CardContent className="grid gap-6">
+        <CardContent className="grid gap-4">
+          <OAuthProviderButton
+            provider={OAuthProviders.google}
+            onClick={handleGoogleSignIn}
+          >
+            Sign up with Google
+          </OAuthProviderButton>
+
+          <OAuthProviderButton
+            provider={OAuthProviders.github}
+            onClick={handleGitHubSignIn}
+          >
+            Sign in with GitHub
+          </OAuthProviderButton>
+
+          <div className="flex items-center gap-4">
+            <Separator className="flex-1" />
+            <span className="text-neutral-500 text-sm">OR</span>
+            <Separator className="flex-1" />
+          </div>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="full_name"
@@ -149,13 +197,13 @@ const SignUpForm = () => {
 
                 {formStatus !== FormStatus.Loading && "Sign Up"}
               </Button>
-            </CardContent>
+            </form>
+          </Form>
+        </CardContent>
 
-            <CardFooter>
-              <SignInFooter />
-            </CardFooter>
-          </form>
-        </Form>
+        <CardFooter className="flex items-center justify-center">
+          <SignInFooter />
+        </CardFooter>
       </Card>
 
       <SocialFooter />

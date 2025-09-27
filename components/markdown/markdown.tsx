@@ -53,15 +53,15 @@ export default function Markdown({ text, className = "" }: Props) {
           );
         },
 
-        code(props) {
-          const { children, className, node, ...rest } = props;
+        code({ children, className, node, ...rest }) {
           const match = /language-(\w+)/.exec(className || "");
+          const value = String(children).replace(/\n$/, "");
           return match ? (
             <CodeBlock
               key={crypto.randomUUID()}
-              language={(match && match[1]) || ""}
-              value={String(children).replace(/\n$/, "")}
-              {...props}
+              language={match[1] || ""}
+              value={value}
+              
             />
           ) : (
             <code {...rest} className={className}>
