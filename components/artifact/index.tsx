@@ -5,6 +5,7 @@ import ABCJS from "abcjs";
 import type { ReactArtifact } from "@/components/artifact/react";
 import { CodeBlock } from "@/components/markdown/code-block";
 import { Button } from "@/components/ui/button";
+import MidiParser from "midi-parser-js";
 import {
   Card,
   CardContent,
@@ -14,7 +15,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard";
 import { ArtifactMessagePartData } from "@/lib/utils";
-import { CheckIcon, ClipboardIcon, PlayIcon, DownloadIcon, XIcon } from "lucide-react";
+import { CheckIcon, ClipboardIcon, PlayIcon, DownloadIcon, UploadIcon, XIcon } from "lucide-react";
 import ABCNotationRenderer from "@/components/ui/ABCNotationRenderer";
 
 type Props = {
@@ -229,6 +230,132 @@ const ArtifactPanel: React.FC<Props> = ({
     } catch (error) {
       console.error("An error occurred during MIDI export: ", error);
       alert("Failed to export MIDI file. Please check the ABC notation format.");
+    }
+  };
+
+  // Advanced MIDI to ABC conversion function using midi-parser-js
+  const convertMidiToAbc = (midiData: Uint8Array, filename: string): string => {
+    try {
+      // Parse MIDI file using midi-parser-js
+      const midiJson = MidiParser.parse(midiData);
+      console.log('Parsed MIDI:', midiJson);
+
+      const baseName = filename.replace(/\.[^/.]+$/, "");
+      
+      // Extract key signature and time signature
+      let keySignature = 'C'; // Default
+      let timeSignature = '4/4'; // Default
+      let tempo = 120; // Default BPM
+      
+      // Look for time and key signature events in all tracks
+      for (const track of midiJson.track) {
+        for (const event of track.event) {
+          if (event.metaType === 88) { // Time signature
+            const numerator = event.data[0];
+            const denominator = Math.pow(2, event.data[1]);
+            timeSignature = `${numerator}/${denominator}`;
+          } else if (event.metaType === 89) { // Key signature
+            const sharpsFlats = event.data[0];
+            const major = event.data[1] === 0; // 0 = major, 1 = minor
+            keySignature = getKeyFromSignature(sharpsFlats, major);
+          } else if (event.metaType === 81) { // Tempo
+            const microsecondsPerQuarter = (event.data[0] << 16) | (event.data[1] << 8) | event.data[2];
+            tempo = Math.round(60000000 / microsecondsPerQuarter);
+          }
+        }
+      }
+
+      // Convert notes to ABC notation
+      const notes = extractNotesFromMidi(midiJson, timeSignature);
+      
+      // Create ABC notation
+      let abc = `X:1\nT:${baseName}\nM:${timeSignature}\nL:1/8\nK:${keySignature}\nQ:${tempo}\n`;
+      abc += `% Converted from MIDI: ${filename}\n`;
+      
+      if (notes.length > 0) {
+        abc += notes.join(' ') + ' |';
+      } else {
+        abc += '% No notes found - please add your melody here\nC D E F |';
+      }
+      
+      return abc;
+    } catch (error) {
+      console.error('MIDI conversion error:', error);
+      
+      // Fallback to basic template
+      const baseName = filename.replace(/\.[^/.]+$/, "");
+      return `X:1\nT:${baseName}\nM:4/4\nL:1/4\nK:C\n% Error converting MIDI file: ${filename}\n% Please edit this ABC notation manually\nC D E F | G A B c |\n`;
+    }
+  };
+
+  // Helper function to convert key signature to ABC key
+  const getKeyFromSignature = (sharpsFlats: number, major: boolean): string => {
+    const majorKeys = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb'];
+    const minorKeys = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m', 'A#m', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm', 'Abm'];
+    
+    // Handle sharps (positive) and flats (negative)
+    let keyIndex = 0;
+    if (sharpsFlats >= 0 && sharpsFlats <= 7) {
+      keyIndex = sharpsFlats;
+    } else if (sharpsFlats < 0 && sharpsFlats >= -7) {
+      keyIndex = 8 + Math.abs(sharpsFlats);
+    }
+    
+    return major ? majorKeys[keyIndex] || 'C' : minorKeys[keyIndex] || 'Am';
+  };
+
+  // Helper function to extract notes from MIDI and convert to ABC
+  const extractNotesFromMidi = (midiJson: any, timeSignature: string): string[] => {
+    const notes: string[] = [];
+    const noteMap: { [key: number]: string } = {
+      60: 'C', 61: '^C', 62: 'D', 63: '^D', 64: 'E', 65: 'F', 
+      66: '^F', 67: 'G', 68: '^G', 69: 'A', 70: '^A', 71: 'B'
+    };
+    
+    try {
+      // Find the track with the most note events (usually the melody)
+      let mainTrack = null;
+      let maxNotes = 0;
+      
+      for (const track of midiJson.track) {
+        const noteCount = track.event.filter((e: any) => e.type === 9 && e.data[1] > 0).length;
+        if (noteCount > maxNotes) {
+          maxNotes = noteCount;
+          mainTrack = track;
+        }
+      }
+      
+      if (!mainTrack || maxNotes === 0) return [];
+      
+      // Extract note on events
+      const noteEvents = mainTrack.event
+        .filter((e: any) => e.type === 9 && e.data[1] > 0) // Note on events with velocity > 0
+        .slice(0, 32) // Limit to first 32 notes to avoid overly long sequences
+        .map((e: any) => {
+          const noteNumber = e.data[0];
+          const octave = Math.floor(noteNumber / 12) - 1;
+          const noteInOctave = noteNumber % 12;
+          
+          // Convert to ABC notation
+          let noteName = noteMap[60 + noteInOctave] || 'C';
+          
+          // Handle octaves
+          if (octave >= 5) {
+            noteName = noteName.toLowerCase();
+            if (octave > 5) {
+              noteName += "'".repeat(octave - 5);
+            }
+          } else if (octave < 4) {
+            noteName += ",".repeat(4 - octave);
+          }
+          
+          return noteName;
+        });
+      
+      return noteEvents;
+    } catch (error) {
+      console.error('Note extraction error:', error);
+      return [];
     }
   };
 
