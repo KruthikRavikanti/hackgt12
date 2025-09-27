@@ -14,7 +14,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard";
 import { ArtifactMessagePartData } from "@/lib/utils";
-import { CheckIcon, ClipboardIcon, PlayIcon, XIcon } from "lucide-react";
+import { CheckIcon, ClipboardIcon, PlayIcon, DownloadIcon, XIcon } from "lucide-react";
 import ABCNotationRenderer from "@/components/ui/ABCNotationRenderer";
 
 type Props = {
@@ -95,6 +95,143 @@ const ArtifactPanel: React.FC<Props> = ({
     }
   };
 
+  const handleDownloadMIDI = () => {
+    try {
+      if (!savedContent || savedContent.trim() === '') {
+        alert("No ABC notation content to export.");
+        return;
+      }
+
+      console.log("ABC Content for MIDI:", savedContent);
+
+      // Create a temporary div element for parsing
+      const tempDiv = document.createElement('div');
+      tempDiv.id = 'temp-midi-export';
+      document.body.appendChild(tempDiv);
+
+      let visualObjs;
+      try {
+        // Parse the ABC notation using the temporary div
+        visualObjs = ABCJS.renderAbc(tempDiv, savedContent, {
+          add_classes: true,
+        });
+        console.log("Visual objects array:", visualObjs);
+        console.log("Array length:", visualObjs?.length);
+      } catch (parseError) {
+        console.error("ABC parsing error:", parseError);
+        document.body.removeChild(tempDiv);
+        alert("Invalid ABC notation format. Please check your composition.");
+        return;
+      } finally {
+        // Clean up the temporary div
+        if (tempDiv.parentNode) {
+          document.body.removeChild(tempDiv);
+        }
+      }
+
+      if (!visualObjs || visualObjs.length === 0) {
+        alert("Unable to parse ABC notation for MIDI export.");
+        return;
+      }
+
+      const visualObj = visualObjs[0];
+      console.log("Selected visual object:", visualObj);
+      console.log("Visual object keys:", Object.keys(visualObj || {}));
+
+      // Generate MIDI using abcjs with proper MIDI format
+      let midiBuffer;
+      
+      try {
+        console.log("Generating MIDI from visual object...");
+        
+        // Use the correct abcjs MIDI generation approach
+        if (typeof ABCJS.synth.getMidiFile === 'function') {
+          // Try with visual object first
+          midiBuffer = ABCJS.synth.getMidiFile(visualObj, {
+            midiOutputType: "binary",
+            midiTransposition: 0
+          });
+        } else if (typeof ABCJS.midi !== 'undefined' && typeof ABCJS.midi.sequence2midi === 'function') {
+          // Alternative approach using ABCJS.midi
+          midiBuffer = ABCJS.midi.sequence2midi(visualObj);
+        } else {
+          // Try to create MIDI using synthesis approach
+          const midiSequence = ABCJS.synth.CreateSynth();
+          if (midiSequence && typeof midiSequence.getMidiFile === 'function') {
+            midiBuffer = midiSequence.getMidiFile(visualObj);
+          }
+        }
+        
+        console.log("MIDI buffer type:", typeof midiBuffer);
+        console.log("MIDI buffer length:", midiBuffer?.length);
+        console.log("MIDI buffer first few bytes:", midiBuffer ? Array.from(midiBuffer.slice(0, 10)) : 'null');
+        
+        if (!midiBuffer) {
+          throw new Error("No MIDI data generated");
+        }
+        
+        // Ensure we have a proper Uint8Array for MIDI
+        if (typeof midiBuffer === 'string') {
+          // Convert string to Uint8Array
+          const encoder = new TextEncoder();
+          midiBuffer = encoder.encode(midiBuffer);
+        } else if (midiBuffer instanceof ArrayBuffer) {
+          midiBuffer = new Uint8Array(midiBuffer);
+        } else if (!midiBuffer instanceof Uint8Array) {
+          midiBuffer = new Uint8Array(midiBuffer);
+        }
+        
+      } catch (midiError) {
+        console.error("MIDI generation error:", midiError);
+        alert("Unable to generate MIDI data. MIDI export may not be supported for this ABC notation.");
+        return;
+      }
+
+      if (!midiBuffer || midiBuffer.length === 0) {
+        alert("Unable to generate MIDI data from ABC notation.");
+        return;
+      }
+
+      console.log("Final MIDI buffer:", midiBuffer);
+      console.log("MIDI header check:", midiBuffer.slice(0, 4));
+
+      // Verify MIDI header (should start with "MThd")
+      const expectedHeader = [0x4D, 0x54, 0x68, 0x64]; // "MThd" in hex
+      const actualHeader = Array.from(midiBuffer.slice(0, 4));
+      console.log("Expected MIDI header:", expectedHeader);
+      console.log("Actual MIDI header:", actualHeader);
+
+      if (!expectedHeader.every((byte, index) => byte === actualHeader[index])) {
+        console.warn("MIDI header mismatch - file may not be valid MIDI format");
+        alert("Generated MIDI file may not be in correct format. The ABC notation might not be fully compatible with MIDI export.");
+        return;
+      }
+
+      // Create blob and download
+      const blob = new Blob([midiBuffer], { type: "audio/midi" });
+      
+      // Generate filename from title or use default
+      const filename = title 
+        ? `${title.replace(/[^a-z0-9\s]/gi, '_').replace(/\s+/g, '_').toLowerCase()}.mid`
+        : 'composition.mid';
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      console.log("MIDI file downloaded successfully:", filename);
+    } catch (error) {
+      console.error("An error occurred during MIDI export: ", error);
+      alert("Failed to export MIDI file. Please check the ABC notation format.");
+    }
+  };
+
   return (
     <Card className="w-full border-none rounded-none flex flex-col h-full max-h-full">
       <CardHeader className="bg-slate-50 rounded-lg border rounded-b-none py-2 px-6 flex flex-row items-center gap-4 justify-between space-y-0">
@@ -125,7 +262,7 @@ const ArtifactPanel: React.FC<Props> = ({
           <TabsContent value="preview">
             <div
               id="abc-notation"
-              className="w-full h-full flex flex-col justify-start items-stretch  rounded-lg overflow-auto"
+              className="w-full h-full flex flex-col justify-start items-stretch rounded-lg overflow-x-auto overflow-y-auto"
             >
               <ABCNotationRenderer abcNotation={savedContent} />
             </div>
@@ -173,6 +310,16 @@ const ArtifactPanel: React.FC<Props> = ({
           className="w-8 h-8"
         >
           <PlayIcon className="w-4 h-4" />
+        </Button>
+        <Button
+          id="download-midi-button"
+          onClick={handleDownloadMIDI}
+          size="icon"
+          variant="outline"
+          className="w-8 h-8"
+          title="Download as MIDI"
+        >
+          <DownloadIcon className="w-4 h-4" />
         </Button>
       </CardFooter>
     </Card>

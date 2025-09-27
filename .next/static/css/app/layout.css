@@ -1428,6 +1428,9 @@ video {
 .w-screen {
   width: 100vw;
 }
+.w-16 {
+  width: 4rem;
+}
 .min-w-\[400px\] {
   min-width: 400px;
 }
@@ -1615,8 +1618,14 @@ video {
 .overflow-hidden {
   overflow: hidden;
 }
+.overflow-x-auto {
+  overflow-x: auto;
+}
 .overflow-y-auto {
   overflow-y: auto;
+}
+.overflow-y-hidden {
+  overflow-y: hidden;
 }
 .overflow-y-scroll {
   overflow-y: scroll;

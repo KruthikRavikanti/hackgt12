@@ -17,7 +17,8 @@ const ABCNotationRenderer: React.FC<ABCNotationRendererProps> = ({ abcNotation }
 
   return (
     <div
-      ref={abcContainerRef} // Ensures it spans across the full width of the viewport
+      ref={abcContainerRef}
+      className="w-full overflow-x-auto overflow-y-hidden"
     ></div>
   );
 };

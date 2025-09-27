@@ -9,7 +9,7 @@ import {
   MessagePart as MessagePartType,
   parseMessage,
 } from "@/lib/utils";
-import { CodeIcon, Loader2Icon, UserIcon } from "lucide-react";
+import { CodeIcon, Loader2Icon, UserIcon, Music2Icon } from "lucide-react";
 import Image from "next/image";
 import duetIcon from "/public/duet.png";  // Import the Duet icon
 
@@ -148,7 +148,7 @@ const MessagePart = ({
           {data.data.generating ? (
             <Loader2Icon className="animate-spin" />
           ) : (
-            <CodeIcon size={18} />
+            <Music2Icon size={18} />
           )}
         </div>
 
@@ -157,7 +157,7 @@ const MessagePart = ({
             {data.data?.title || "Generating"}
           </span>
           <span className="text-gray-500 line-clamp-1 text-xs">
-            {data.data?.content ? "Click to show code" : ""}
+            {data.data?.content ? "Open music" : ""}
           </span>
         </div>
       </Button>
