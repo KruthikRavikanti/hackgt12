@@ -1,4 +1,34 @@
 {
+  "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> @ffmpeg/ffmpeg": {
+    "id": "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> @ffmpeg/ffmpeg",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_ffmpeg_ffmpeg_src_index_js.js"
+    ]
+  },
+  "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> axios": {
+    "id": "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> axios",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_axios_index_js.js"
+    ]
+  },
+  "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> hark": {
+    "id": "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> hark",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_hark_hark_js.js"
+    ]
+  },
+  "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> lamejs": {
+    "id": "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> lamejs",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_lamejs_src_js_index_js.js"
+    ]
+  },
+  "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> recordrtc": {
+    "id": "node_modules\\@chengsokdara\\use-whisper\\dist\\chunk-32KRFHOA.js -> recordrtc",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_recordrtc_RecordRTC_js.js"
+    ]
+  },
   "node_modules\\@supabase\\auth-js\\dist\\module\\lib\\helpers.js -> @supabase/node-fetch": {
     "id": "node_modules\\@supabase\\auth-js\\dist\\module\\lib\\helpers.js -> @supabase/node-fetch",
     "files": []

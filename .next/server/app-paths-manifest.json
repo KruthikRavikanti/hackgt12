@@ -1,3 +1,4 @@
 {
-  "/sonify/page": "app/sonify/page.js"
+  "/sonify/page": "app/sonify/page.js",
+  "/new/page": "app/new/page.js"
 }

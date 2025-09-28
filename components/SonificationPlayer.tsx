@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, Play, Pause, Download, FileVideo, Music } from 'lucide-react';
+import { Upload, Play, Pause, Download, FileVideo, Music, FolderPlus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface SonificationResult {
@@ -11,8 +11,6 @@ interface SonificationResult {
   audioUrl: string;
   videoAnalysis: any;
   musicalPlan: any;
-  rawPlanBeforeGapFill?: any;
-  gapFilledPlan?: any;
   message: string;
 }
 
@@ -111,11 +109,7 @@ const SonificationPlayer: React.FC = () => {
       if (result.success) {
         setAudioUrl(result.audioUrl);
         setVideoAnalysis(result.videoAnalysis || null);
-        setMusicalPlan({
-          final: result.musicalPlan || null,
-          rawBeforeGapFill: result.rawPlanBeforeGapFill || null,
-          gapFilled: result.gapFilledPlan || null
-        });
+        setMusicalPlan(result.musicalPlan || null);
         toast.success(result.message);
       } else {
         throw new Error('Sonification failed');
@@ -157,6 +151,13 @@ const SonificationPlayer: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="flex items-start">
+        <a href="/new">
+          <button className="bg-[#121B28] text-white px-4 py-2 rounded-full shadow hover:bg-[#24304a] transition">
+            Create!
+          </button>
+        </a>
+      </div>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Sports Clip Sonification
@@ -192,7 +193,7 @@ const SonificationPlayer: React.FC = () => {
           <div className="mt-4 flex justify-center">
             <Button
               variant="default"
-              className="w-40"
+              className="w-56"
               onClick={handleUploadAndSonify}
             >
               {isLoading ? (loadingStep || 'Processing...') : 'Submit'}
@@ -205,7 +206,7 @@ const SonificationPlayer: React.FC = () => {
       {videoUrl && (
         <Card>
           <CardHeader>
-            <CardTitle>Video Preview {videoDurationMs ? `(~${Math.round(videoDurationMs/1000)}s)` : ''}</CardTitle>
+            <CardTitle>Video Preview</CardTitle>
           </CardHeader>
           <CardContent>
             <video
@@ -221,60 +222,15 @@ const SonificationPlayer: React.FC = () => {
         </Card>
       )}
 
-      {/* Debug Output: Video Analysis & Musical Plan */}
-      {(videoAnalysis || musicalPlan) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Analysis & Musical Plan (Debug)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {videoAnalysis && (
-              <div>
-                <h3 className="text-sm font-semibold mb-1">Video Analysis JSON</h3>
-                <pre className="text-xs bg-gray-900 text-gray-100 p-3 rounded max-h-64 overflow-auto whitespace-pre-wrap break-all">
-{JSON.stringify(videoAnalysis, null, 2)}
-                </pre>
-              </div>
-            )}
-            {musicalPlan && (
-              <div className="space-y-4">
-                {musicalPlan.rawBeforeGapFill && (
-                  <div>
-                    <h3 className="text-sm font-semibold mb-1">Plan (Raw from Gemini before gap fill)</h3>
-                    <pre className="text-xs bg-gray-900 text-gray-100 p-3 rounded max-h-60 overflow-auto whitespace-pre-wrap break-all">
-{JSON.stringify(musicalPlan.rawBeforeGapFill, null, 2)}
-                    </pre>
-                  </div>
-                )}
-                {musicalPlan.gapFilled && (
-                  <div>
-                    <h3 className="text-sm font-semibold mb-1">Plan After Median Gap Fill</h3>
-                    <pre className="text-xs bg-gray-900 text-gray-100 p-3 rounded max-h-60 overflow-auto whitespace-pre-wrap break-all">
-{JSON.stringify(musicalPlan.gapFilled, null, 2)}
-                    </pre>
-                  </div>
-                )}
-                {musicalPlan.final && (
-                  <div>
-                    <h3 className="text-sm font-semibold mb-1">Final Plan (Post Scaling / Returned)</h3>
-                    <pre className="text-xs bg-gray-900 text-gray-100 p-3 rounded max-h-60 overflow-auto whitespace-pre-wrap break-all">
-{JSON.stringify(musicalPlan.final, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {/* Removed debug JSON output as requested */}
 
       {/* Audio Player */}
       {audioUrl && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Music className="h-5 w-5" />
-              Generated Soundtrack
+              {/* <Music className="h-5 w-5" /> */}
+              Sonified Soundtrack
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -299,6 +255,14 @@ const SonificationPlayer: React.FC = () => {
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" /> Download
+              </Button>
+              <Button
+                onClick={() => { /* future incorporate logic */ }}
+                variant="outline"
+                size="lg"
+                className="flex items-center gap-2"
+              >
+                <FolderPlus className="h-4 w-4" /> Incorporate
               </Button>
             </div>
             
