@@ -12,6 +12,7 @@
     "@ai-sdk/openai": "^0.0.38",
     "@chengsokdara/use-whisper": "^0.2.0",
     "@ffmpeg/core": "^0.11.0",
+    "@google/generative-ai": "^0.11.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.1",
@@ -30,8 +31,10 @@
     "ai": "^3.2.34",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "fluent-ffmpeg": "^2.1.3",
     "lucide-react": "^0.407.0",
     "midi-parser-js": "^4.0.4",
+    "midi-writer-js": "^3.1.1",
     "next": "^14.2.17",
     "react": "^18",
     "react-dom": "^18",
@@ -44,6 +47,7 @@
     "supabase": "^1.215.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^13.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

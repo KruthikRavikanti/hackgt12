@@ -26,27 +26,14 @@ export const SideNavBar = () => {
   console.log("Session:", session);
   console.log("User ID:", userId);
 
-  const {
-    data: chats,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ["chats", userId],
-    queryFn: async () => {
-      if (!userId) {
-        console.warn("User ID is undefined, skipping chat fetch");
-        return [];
-      }
-      return await getChats(supabase, userId);
-    },
-    enabled: !!userId,
-  });
-
-  // Log chats and errors to debug data fetching issues
-  useEffect(() => {
-    if (chats) console.log("Fetched chats:", chats);
-    if (error) console.error("Error fetching chats:", error);
-  }, [chats, error]);
+  // Hardcoded chat history for proof of concept
+  const chats = [
+    { id: "1", title: "Gloomy ballad in D minor" },
+    { id: "2", title: "Wedding playlist ideas" },
+    { id: "3", title: "Energetic workout mix" },
+    { id: "4", title: "Lo-fi study session" },
+    { id: "5", title: "Epic orchestral theme" },
+  ];
 
   if (open) {
     return (
@@ -75,23 +62,16 @@ export const SideNavBar = () => {
 
         <div className="flex flex-col flex-1 gap-2 overflow-hidden">
           <span className="font-medium text-[#f8f6f3]">Chats</span>
-          {chats && chats.length > 0 ? (
-            <div className="flex flex-col flex-1 gap-2 overflow-auto">
-              {chats.map((item, index) => (
-                <ChatItem
-                  key={index}
-                  id={item.id}
-                  title={item.title}
-                  selected={item.id === params.id}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-200">No chats available</p>
-          )}
-
-          {isLoading && <Loader2Icon className="w-4 h-4 animate-spin" />}
-          {error && <p className="text-red-400">Could not fetch chats</p>}
+          <div className="flex flex-col flex-1 gap-2 overflow-auto">
+            {chats.map((item, index) => (
+              <ChatItem
+                key={index}
+                id={item.id}
+                title={item.title}
+                selected={false}
+              />
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 mt-2">
@@ -130,14 +110,20 @@ export const SideNavBar = () => {
         </div>
       </div>
 
+      <div className="flex flex-col flex-1 gap-2 overflow-hidden w-full">
+        <span className="font-medium text-[#f8f6f3]">Chats</span>
+        <div className="flex flex-col flex-1 gap-2 overflow-auto w-full">
+          {chats.map((item, index) => (
+            <ChatItem
+              key={index}
+              id={item.id}
+              title={item.title}
+              selected={false}
+            />
+          ))}
+        </div>
+      </div>
       <div className="flex flex-col items-center gap-4">
-        {/* <a
-          href="https://github.com/13point5/open-artifacts"
-          target="_blank"
-          className="text-black"
-        >
-          <Image src="/github.svg" height="24" width="24" alt="github logo" />
-        </a> */}
         <UserSettings />
         <UserButton />
       </div>

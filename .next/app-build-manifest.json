@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/new/page": [
+    "/sonify/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/new/page.js"
+      "static/chunks/app/sonify/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
