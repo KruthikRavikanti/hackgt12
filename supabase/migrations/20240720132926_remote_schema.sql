@@ -10,7 +10,21 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
+-- Ensure the schema exists first
+CREATE SCHEMA IF NOT EXISTS "pgsodium";
+
+-- Try to install the extension; if not available on this project/plan, skip with a notice
+DO $$
+BEGIN
+  BEGIN
+    CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
+  EXCEPTION
+    WHEN OTHERS THEN
+      RAISE NOTICE 'pgsodium not available in this database; skipping extension install';
+  END;
+END
+$$;
+
 
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 

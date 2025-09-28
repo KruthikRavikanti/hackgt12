@@ -10,9 +10,11 @@ export const dynamic = 'force-dynamic';
 
 
 export default async function LandingPage() {
+  // Bypass auth for development - redirect directly to /new
+
   const supabase = createServerComponentClient({ cookies });
 
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

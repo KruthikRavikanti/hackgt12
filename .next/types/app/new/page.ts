@@ -1,4 +1,4 @@
-// File: C:\Users\gajul\Documents\hackgt12\app\new\page.tsx
+// File: /home/nchin1/DuetHackathon/hackgt12/app/new/page.tsx
 import * as entry from '../../../../app/new/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

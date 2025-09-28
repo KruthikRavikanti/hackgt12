@@ -20,6 +20,8 @@ const getDisplayNameFromRole = (
   if (role === "user") return "Me";
 
   switch (model) {
+    case Models.gpt5:
+      return "GPT-5";
     case Models.gpt4o:
       return "GPT 4o";
     default:

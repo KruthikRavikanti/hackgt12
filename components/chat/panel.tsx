@@ -176,6 +176,17 @@ export const ChatPanel = ({ id }: Props) => {
 
     const settings = getSettings();
 
+    // Check for GPT-5 and provide a warning since it doesn't exist yet
+    if (settings.model === Models.gpt5) {
+      toast.error("GPT-5 is not available yet. Switching to GPT-4o instead.");
+
+      // Fallback to GPT-4o
+      settings.model = Models.gpt4o;
+
+      // Update the stored settings
+      const { updateSettings } = await import("@/lib/userSettings");
+      updateSettings({ ...settings, model: Models.gpt4o });
+    }
 
     if (settings.model.startsWith("gpt") && !settings.openaiApiKey) {
       toast.error("Please enter your OpenAI API Key");

@@ -5,6 +5,7 @@ export const settingsLocalStorageKey = "openArtifacts:settings";
 
 export const settingsSchema = z.object({
   openaiApiKey: z.string(),
+  anthropicApiKey: z.string().optional(),
   model: z.nativeEnum(Models),
 });
 
@@ -12,6 +13,7 @@ export type SettingsSchema = z.infer<typeof settingsSchema>;
 
 const defaultSettings: SettingsSchema = {
   openaiApiKey: "",
+  anthropicApiKey: "",
   model: Models.gpt4o,
 };
 

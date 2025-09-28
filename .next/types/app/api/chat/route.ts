@@ -1,4 +1,4 @@
-// File: C:\Users\gajul\Documents\hackgt12\app\api\chat\route.ts
+// File: /home/nchin1/DuetHackathon/hackgt12/app/api/chat/route.ts
 import * as entry from '../../../../../app/api/chat/route.js'
 import type { NextRequest } from 'next/server.js'
 

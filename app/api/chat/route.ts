@@ -1,6 +1,7 @@
 import { DuetSystemPrompt } from "@/app/api/chat/systemPrompt";
 import { streamText, convertToCoreMessages, Message, ImagePart } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { Models } from "@/app/types";
 
 export const maxDuration = 60;
@@ -18,6 +19,12 @@ export async function POST(req: Request) {
     });
 
     llm = openai(model);
+  } else if (model.startsWith("claude")) {
+    const anthropic = createAnthropic({
+      apiKey,
+    });
+
+    llm = anthropic(model);
   } else {
     throw new Error(`Unsupported model: ${model}`);
   }

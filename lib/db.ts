@@ -92,3 +92,38 @@ export const addMessage = async (
 
   return message;
 };
+
+export const deleteChat = async (
+  supabase: SupabaseContextType["supabase"],
+  chatId: string,
+  userId: string | null | undefined
+) => {
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  // First, delete all messages associated with this chat
+  const { error: messagesError } = await supabase
+    .from("messages")
+    .delete()
+    .eq("chat_id", chatId);
+
+  if (messagesError) {
+    console.error("Error deleting messages:", messagesError);
+    throw new Error(messagesError.message);
+  }
+
+  // Then delete the chat itself
+  const { error: chatError } = await supabase
+    .from("chats")
+    .delete()
+    .eq("id", chatId)
+    .eq("user_id", userId); // Ensure user owns this chat
+
+  if (chatError) {
+    console.error("Error deleting chat:", chatError);
+    throw new Error(chatError.message);
+  }
+
+  return true;
+};

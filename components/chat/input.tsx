@@ -396,11 +396,15 @@ export const ChatInput = ({
             <SelectValue placeholder="Select Model" />
           </SelectTrigger>
           <SelectContent className="w-fit">
-          <SelectItem value={Models.gpt4o}>Duet</SelectItem>
+          <SelectItem value={Models.gpt5}>GPT-5</SelectItem>
+          <SelectItem value={Models.gpt4o}>GPT-4o</SelectItem>
           <SelectItem value={Models.gpt4oMini}>GPT-4o Mini</SelectItem>
           <SelectItem value={Models.gpt4turbo}>GPT-4 Turbo</SelectItem>
           <SelectItem value={Models.gpt35turbo}>GPT-3.5 Turbo</SelectItem>
-
+          <SelectItem value={Models.claude35sonnet}>Claude 3.5 Sonnet</SelectItem>
+          <SelectItem value={Models.claude3opus}>Claude 3 Opus</SelectItem>
+          <SelectItem value={Models.claude3sonnet}>Claude 3 Sonnet</SelectItem>
+          <SelectItem value={Models.claude3haiku}>Claude 3 Haiku</SelectItem>
           </SelectContent>
         </Select>
       </div>
