@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   }));
 
   const result = await streamText({
-    model: llm,
+    model: llm as any,
     messages: [
       ...convertToCoreMessages(initialMessages),
       {

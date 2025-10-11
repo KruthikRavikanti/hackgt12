@@ -74,14 +74,17 @@ export const ChatPanel = ({ id }: Props) => {
       secondMessage: Message;
     }) => await createChat(supabase, title, session?.user.id),
     onSuccess: async (newChat, { firstMessage, secondMessage }) => {
-      queryClient.setQueryData<Chat[]>(["chats"], (oldChats) => {
-        return [...(oldChats || []), newChat];
-      });
+      // Update the local state
       setChatId(newChat.id);
 
+      // Save messages to database
       await addMessage(supabase, newChat.id, firstMessage);
       await addMessage(supabase, newChat.id, secondMessage);
 
+      // Invalidate the chats query to refresh the sidebar
+      queryClient.invalidateQueries({ queryKey: ["chats", session?.user.id] });
+
+      // Navigate to the new chat
       router.push(`/chat/${newChat.id}`);
     },
   });
@@ -273,8 +276,6 @@ export const ChatPanel = ({ id }: Props) => {
               content={currentArtifact.content}
               language={currentArtifact.language}
               onClose={() => setCurrentArtifact(null)}
-              recording={recording}
-              onCapture={handleCapture}
             />
           </div>
         </div>

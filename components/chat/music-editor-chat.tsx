@@ -15,6 +15,7 @@ import {
 import Textarea from "react-textarea-autosize";
 import { useEnterSubmit } from "@/lib/hooks/use-enter-submit";
 import ReactMarkdown from "react-markdown";
+import toast from "react-hot-toast";
 
 interface MusicEditorChatProps {
   abcNotation: string;
@@ -87,7 +88,7 @@ export const MusicEditorChat: React.FC<MusicEditorChatProps> = ({
     return (
       <Button
         onClick={onToggleVisibility}
-        className="fixed bottom-4 right-4 rounded-full shadow-lg z-50"
+        className="fixed bottom-20 right-4 rounded-full shadow-lg z-50"
         size="icon"
         variant="default"
       >
@@ -97,7 +98,7 @@ export const MusicEditorChat: React.FC<MusicEditorChatProps> = ({
   }
 
   return (
-    <Card className={`fixed bottom-4 right-4 shadow-2xl z-50 transition-all duration-300 ${
+    <Card className={`fixed bottom-20 right-4 shadow-2xl z-50 transition-all duration-300 ${
       isMinimized ? 'w-64 h-14' : 'w-96 h-[600px]'
     } flex flex-col`}>
       {/* Header */}
@@ -176,18 +177,23 @@ export const MusicEditorChat: React.FC<MusicEditorChatProps> = ({
                         code: ({ className, children, ...props }) => {
                           const isAbc = className?.includes('language-abc');
                           if (isAbc && onAbcSuggestion) {
+                            const abcContent = String(children).trim();
                             return (
-                              <div className="relative">
-                                <code className={className} {...props}>
-                                  {children}
-                                </code>
+                              <div className="relative bg-gray-50 p-2 rounded my-2">
+                                <pre className="overflow-x-auto text-xs">
+                                  <code className={className} {...props}>
+                                    {children}
+                                  </code>
+                                </pre>
                                 <Button
-                                  onClick={() => onAbcSuggestion(String(children))}
+                                  onClick={() => {
+                                    onAbcSuggestion(abcContent);
+                                    toast.success('ABC notation updated!');
+                                  }}
                                   size="sm"
-                                  variant="outline"
-                                  className="absolute top-0 right-0 text-xs"
+                                  className="absolute top-2 right-2 bg-green-500 hover:bg-green-600 text-white text-xs"
                                 >
-                                  Apply
+                                  Apply Changes
                                 </Button>
                               </div>
                             );

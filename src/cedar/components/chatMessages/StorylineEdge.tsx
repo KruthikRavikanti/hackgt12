@@ -23,7 +23,7 @@ const StorylineEdge: React.FC<StorylineEdgeProps> = ({
 			pathLength: 1,
 			opacity: 1,
 			transition: {
-				pathLength: { duration: 0.5, ease: 'easeInOut' },
+				pathLength: { duration: 0.5, ease: 'easeInOut' as const },
 				opacity: { duration: 0.2 },
 			},
 		},
@@ -38,7 +38,7 @@ const StorylineEdge: React.FC<StorylineEdgeProps> = ({
 			transition: {
 				delay: 0.4,
 				duration: 0.2,
-				ease: 'backOut',
+				ease: 'backOut' as const,
 			},
 		},
 	};

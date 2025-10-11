@@ -28,7 +28,7 @@ export const ChatMessageList = ({
           <ChatMessage
             key={index}
             role={message.role}
-            model={message.model}
+            model={(message as any).model}
             text={message.content}
             attachments={message.experimental_attachments || []}
             setCurrentArtifact={setCurrentArtifact}

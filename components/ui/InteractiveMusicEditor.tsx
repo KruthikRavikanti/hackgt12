@@ -12,7 +12,9 @@ import {
   Music4,
   Circle,
   Square,
-  MessageCircle
+  MessageCircle,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { MusicEditorChat } from '@/components/chat/music-editor-chat';
 import { useMusicChat } from '@/lib/hooks/use-music-chat';
@@ -40,10 +42,12 @@ const InteractiveMusicEditor: React.FC<InteractiveMusicEditorProps> = ({
   onPlaybackRender
 }) => {
   const abcContainerRef = useRef<HTMLDivElement>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<string[]>([abcNotation]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [showPiano, setShowPiano] = useState(false);
   const [viewMode, setViewMode] = useState<'visual' | 'text' | 'split'>('visual');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [editingNote, setEditingNote] = useState<{
     charIndex: number;
     originalText: string;
@@ -109,6 +113,29 @@ const InteractiveMusicEditor: React.FC<InteractiveMusicEditorProps> = ({
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   }, [history, historyIndex]);
+
+  // Toggle fullscreen mode
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      editorContainerRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  // Listen for fullscreen changes (e.g., ESC key)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   // Simple note click handler that identifies the position in the ABC string
   const handleNoteClick = useCallback((abcElem: any, tuneNumber: number, classes: string, analysis: any, drag: any, mouseEvent: MouseEvent) => {
@@ -373,7 +400,10 @@ const InteractiveMusicEditor: React.FC<InteractiveMusicEditorProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col space-y-4">
+    <div
+      ref={editorContainerRef}
+      className={`w-full h-full flex flex-col space-y-4 ${isFullscreen ? 'bg-gray-50 p-4' : ''}`}
+    >
       {!readOnly && (
         <Card className="p-4">
           <div className="flex items-center justify-between mb-4">
@@ -423,6 +453,18 @@ const InteractiveMusicEditor: React.FC<InteractiveMusicEditorProps> = ({
               >
                 <MessageCircle className="w-4 h-4 mr-1" />
                 {isChatVisible ? 'Hide' : 'Show'} Assistant
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleFullscreen}
+                title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="w-4 h-4" />
+                ) : (
+                  <Maximize2 className="w-4 h-4" />
+                )}
               </Button>
             </div>
           </div>

@@ -60,13 +60,17 @@ export function useMusicChat({ abcNotation, onAbcSuggestion }: UseMusicChatProps
     // Store the last user message
     lastUserMessageRef.current = query;
 
-    // Create the message with ABC context
+    // Create the message with ABC context and instructions
     const messageWithContext = `Current ABC Notation:
 \`\`\`abc
 ${abcNotation}
 \`\`\`
 
-User Question: ${query}`;
+User Request: ${query}
+
+IMPORTANT: If the user asks you to modify, change, or update the music, provide the COMPLETE modified ABC notation wrapped in \`\`\`abc code blocks. Don't just show the changes, show the entire updated ABC notation.
+
+For example, if asked to "add a bass line" or "transpose to D major" or "make it slower", provide the full ABC notation with those changes applied.`;
 
     // Send the message with the model and API key
     await append(

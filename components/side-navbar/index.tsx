@@ -26,27 +26,12 @@ export const SideNavBar = () => {
   console.log("Session:", session);
   console.log("User ID:", userId);
 
-  const {
-    data: chats,
-    error,
-    isLoading,
-  } = useQuery({
+  // Fetch chats from database
+  const { data: chats = [], isLoading } = useQuery({
     queryKey: ["chats", userId],
-    queryFn: async () => {
-      if (!userId) {
-        console.warn("User ID is undefined, skipping chat fetch");
-        return [];
-      }
-      return await getChats(supabase, userId);
-    },
+    queryFn: () => getChats(supabase, userId),
     enabled: !!userId,
   });
-
-  // Log chats and errors to debug data fetching issues
-  useEffect(() => {
-    if (chats) console.log("Fetched chats:", chats);
-    if (error) console.error("Error fetching chats:", error);
-  }, [chats, error]);
 
   if (open) {
     return (
@@ -75,23 +60,26 @@ export const SideNavBar = () => {
 
         <div className="flex flex-col flex-1 gap-2 overflow-hidden">
           <span className="font-medium text-[#f8f6f3]">Chats</span>
-          {chats && chats.length > 0 ? (
-            <div className="flex flex-col flex-1 gap-2 overflow-auto">
-              {chats.map((item, index) => (
+          <div className="flex flex-col flex-1 gap-2 overflow-auto">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2Icon className="w-4 h-4 animate-spin text-gray-400" />
+              </div>
+            ) : chats.length === 0 ? (
+              <div className="text-sm text-gray-400 text-center py-4">
+                No chats yet
+              </div>
+            ) : (
+              chats.map((item) => (
                 <ChatItem
-                  key={index}
+                  key={item.id}
                   id={item.id}
                   title={item.title}
-                  selected={item.id === params.id}
+                  selected={params.id === item.id}
                 />
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-200">No chats available</p>
-          )}
-
-          {isLoading && <Loader2Icon className="w-4 h-4 animate-spin" />}
-          {error && <p className="text-red-400">Could not fetch chats</p>}
+              ))
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 mt-2">
@@ -130,14 +118,30 @@ export const SideNavBar = () => {
         </div>
       </div>
 
+      <div className="flex flex-col flex-1 gap-2 overflow-hidden w-full">
+        <span className="font-medium text-[#f8f6f3]">Chats</span>
+        <div className="flex flex-col flex-1 gap-2 overflow-auto w-full">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2Icon className="w-4 h-4 animate-spin text-gray-400" />
+            </div>
+          ) : chats.length === 0 ? (
+            <div className="text-sm text-gray-400 text-center py-4">
+              No chats yet
+            </div>
+          ) : (
+            chats.map((item) => (
+              <ChatItem
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                selected={params.id === item.id}
+              />
+            ))
+          )}
+        </div>
+      </div>
       <div className="flex flex-col items-center gap-4">
-        {/* <a
-          href="https://github.com/13point5/open-artifacts"
-          target="_blank"
-          className="text-black"
-        >
-          <Image src="/github.svg" height="24" width="24" alt="github logo" />
-        </a> */}
         <UserSettings />
         <UserButton />
       </div>

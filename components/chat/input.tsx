@@ -139,7 +139,7 @@ export const ChatInput = ({
     }
   };
 
-  // Advanced MIDI to ABC conversion function using midi-parser-js
+  // Enhanced MIDI to ABC conversion with metadata preservation
   const convertMidiToAbc = (midiData: Uint8Array, filename: string): string => {
     try {
       // Parse MIDI file using midi-parser-js
@@ -152,9 +152,23 @@ export const ChatInput = ({
       let keySignature = 'C'; // Default
       let timeSignature = '4/4'; // Default
       let tempo = 120; // Default BPM
+      let midiMetadata: any = {
+        tracks: [],
+        division: midiJson.division || 480,
+        format: midiJson.formatType || 1
+      };
       
       // Look for time and key signature events in all tracks
-      for (const track of midiJson.track) {
+      for (let trackIndex = 0; trackIndex < midiJson.track.length; trackIndex++) {
+        const track = midiJson.track[trackIndex];
+        let trackInfo: any = {
+          index: trackIndex,
+          name: '',
+          instrument: 0,
+          channel: 0,
+          notes: []
+        };
+
         for (const event of track.event) {
           if (event.metaType === 88) { // Time signature
             const numerator = event.data[0];
@@ -167,19 +181,54 @@ export const ChatInput = ({
           } else if (event.metaType === 81) { // Tempo
             const microsecondsPerQuarter = (event.data[0] << 16) | (event.data[1] << 8) | event.data[2];
             tempo = Math.round(60000000 / microsecondsPerQuarter);
+          } else if (event.metaType === 3) { // Track name
+            trackInfo.name = event.data || `Track ${trackIndex + 1}`;
+          } else if (event.type === 12) { // Program change (instrument)
+            trackInfo.instrument = event.data[0];
+            trackInfo.channel = event.channel || 0;
+          } else if (event.type === 9 && event.data[1] > 0) { // Note on
+            trackInfo.notes.push({
+              note: event.data[0],
+              velocity: event.data[1],
+              time: event.deltaTime
+            });
           }
+        }
+        
+        if (trackInfo.notes.length > 0 || trackInfo.name || trackInfo.instrument > 0) {
+          midiMetadata.tracks.push(trackInfo);
         }
       }
 
-      // Convert notes to ABC notation
-      const notes = extractNotesFromMidi(midiJson, timeSignature);
+      // Convert notes to ABC notation with velocity information
+      const { notes, velocities } = extractNotesWithVelocityFromMidi(midiJson, timeSignature);
       
-      // Create ABC notation
+      // Create ABC notation with MIDI metadata
       let abc = `X:1\nT:${baseName}\nM:${timeSignature}\nL:1/8\nK:${keySignature}\nQ:${tempo}\n`;
-      abc += `% Converted from MIDI: ${filename}\n`;
+      abc += `% === MIDI METADATA ===\n`;
+      abc += `% MIDI_SOURCE: ${filename}\n`;
+      abc += `% MIDI_DIVISION: ${midiMetadata.division}\n`;
+      abc += `% MIDI_FORMAT: ${midiMetadata.format}\n`;
+      
+      // Add track information
+      midiMetadata.tracks.forEach((track: any, index: number) => {
+        abc += `% TRACK_${index}_NAME: ${track.name || 'Untitled'}\n`;
+        abc += `% TRACK_${index}_INSTRUMENT: ${track.instrument}\n`;
+        abc += `% TRACK_${index}_CHANNEL: ${track.channel}\n`;
+      });
+      
+      abc += `% === END METADATA ===\n`;
       
       if (notes.length > 0) {
-        abc += notes.join(' ') + ' |';
+        abc += '% Note velocities preserved in comments\n';
+        notes.forEach((note, index) => {
+          const velocity = velocities[index] || 64;
+          abc += `${note}`; // Add velocity as inline comment for important variations
+          if (velocity !== 64 && (velocity < 40 || velocity > 100)) {
+            abc += ` % vel:${velocity}`;
+          }
+          abc += index < notes.length - 1 ? ' ' : ' |';
+        });
       } else {
         abc += '% No notes found - please add your melody here\nC D E F |';
       }
@@ -210,9 +259,10 @@ export const ChatInput = ({
     return major ? majorKeys[keyIndex] || 'C' : minorKeys[keyIndex] || 'Am';
   };
 
-  // Helper function to extract notes from MIDI and convert to ABC
-  const extractNotesFromMidi = (midiJson: any, timeSignature: string): string[] => {
+  // Helper function to extract notes with velocity from MIDI and convert to ABC
+  const extractNotesWithVelocityFromMidi = (midiJson: any, timeSignature: string): { notes: string[], velocities: number[] } => {
     const notes: string[] = [];
+    const velocities: number[] = [];
     const noteMap: { [key: number]: string } = {
       60: 'C', 61: '^C', 62: 'D', 63: '^D', 64: 'E', 65: 'F', 
       66: '^F', 67: 'G', 68: '^G', 69: 'A', 70: '^A', 71: 'B'
@@ -231,14 +281,15 @@ export const ChatInput = ({
         }
       }
       
-      if (!mainTrack || maxNotes === 0) return [];
+      if (!mainTrack || maxNotes === 0) return { notes: [], velocities: [] };
       
-      // Extract note on events
+      // Extract note on events with velocity
       const noteEvents = mainTrack.event
         .filter((e: any) => e.type === 9 && e.data[1] > 0) // Note on events with velocity > 0
         .slice(0, 32) // Limit to first 32 notes to avoid overly long sequences
         .map((e: any) => {
           const noteNumber = e.data[0];
+          const velocity = e.data[1];
           const octave = Math.floor(noteNumber / 12) - 1;
           const noteInOctave = noteNumber % 12;
           
@@ -255,13 +306,18 @@ export const ChatInput = ({
             noteName += ",".repeat(4 - octave);
           }
           
-          return noteName;
+          return { note: noteName, velocity };
         });
       
-      return noteEvents;
+      noteEvents.forEach((event: any) => {
+        notes.push(event.note);
+        velocities.push(event.velocity);
+      });
+      
+      return { notes, velocities };
     } catch (error) {
       console.error('Note extraction error:', error);
-      return [];
+      return { notes: [], velocities: [] };
     }
   };
 
